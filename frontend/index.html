@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anonymous Letter Platform</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      width: 100%;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    button {
+      background-color: #5a67d8;
+      color: white;
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background-color: #434190;
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .letter-container {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #edf2f7;
+      border-radius: 5px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Anonymous Letter Platform</h1>
+
+    <!-- Buttons to choose the action -->
+    <button id="write-letter-btn">Write a Letter</button>
+    <button id="read-letter-btn">Read a Random Letter</button>
+
+    <!-- Write Letter Form -->
+    <div id="write-letter-form" class="hidden">
+      <h2>Write Your Letter</h2>
+      <textarea id="letter-text" placeholder="Type your feelings here..."></textarea>
+      <button id="submit-letter-btn">Submit Letter</button>
+    </div>
+
+    <!-- Display Random Letter -->
+    <div id="random-letter-container" class="hidden">
+      <h2>Read a Random Letter</h2>
+      <div class="letter-container" id="random-letter">This is where a random letter will be displayed...</div>
+      <button id="reply-letter-btn">Reply to this Letter</button>
+    </div>
+
+    <!-- Reply Form -->
+    <div id="reply-form" class="hidden">
+      <h2>Reply to the Letter</h2>
+      <textarea id="reply-text" placeholder="Type your reply here..."></textarea>
+      <button id="submit-reply-btn">Submit Reply</button>
+    </div>
+  </div>
+
+  <script>
+    // Get elements by their ID
+    const writeLetterBtn = document.getElementById('write-letter-btn');
+    const readLetterBtn = document.getElementById('read-letter-btn');
+    const writeLetterForm = document.getElementById('write-letter-form');
+    const randomLetterContainer = document.getElementById('random-letter-container');
+    const replyForm = document.getElementById('reply-form');
+    const submitLetterBtn = document.getElementById('submit-letter-btn');
+    const submitReplyBtn = document.getElementById('submit-reply-btn');
+
+    // Show the "Write a Letter" form
+    writeLetterBtn.addEventListener('click', () => {
+      writeLetterForm.classList.remove('hidden');
+      randomLetterContainer.classList.add('hidden');
+      replyForm.classList.add('hidden');
+    });
+
+    // Show a random letter (replacing placeholder behavior)
+    readLetterBtn.addEventListener('click', () => {
+      fetch('http://localhost:3000/random-letter')
+        .then(response => response.json())
+        .then(data => {
+          if (data.message) {
+            alert(data.message);  // No letters available
+          } else {
+            document.getElementById('random-letter').innerText = data.content;
+            randomLetterContainer.classList.remove('hidden');
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+
+    // Submit the letter (replacing placeholder behavior)
+    submitLetterBtn.addEventListener('click', () => {
+      const letterText = document.getElementById('letter-text').value;
+      if (letterText.trim() === "") {
+        alert("Please write something before submitting.");
+        return;
+      }
+
+      // Send letter to the backend
+      fetch('http://localhost:3000/submit-letter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ content: letterText })
+      })
+        .then(response => response.json())
+        .then(data => {
+          alert("Your letter has been submitted!");
+          document.getElementById('letter-text').value = "";  // Clear the text area
+          writeLetterForm.classList.add('hidden');
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+
+    // Reply to the random letter (show reply form)
+    document.getElementById('reply-letter-btn').addEventListener('click', () => {
+      replyForm.classList.remove('hidden');
+    });
+
+    // Submit the reply (replacing placeholder behavior)
+    submitReplyBtn.addEventListener('click', () => {
+      const replyText = document.getElementById('reply-text').value;
+      if (replyText.trim() === "") {
+        alert("Please write a reply before submitting.");
+        return;
+      }
+
+      // Send reply to the backend (assuming the current letter's ID is 1 for now)
+      fetch('http://localhost:3000/submit-reply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ letterId: 1, content: replyText })  // Hardcoded letterId for now
+      })
+        .then(response => response.json())
+        .then(data => {
+          alert("Your reply has been submitted!");
+          document.getElementById('reply-text').value = "";  // Clear the text area
+          replyForm.classList.add('hidden');
+        })
+        .catch(error => console.error('Error:', error));
+    });
+
+  </script>
+
+</body>
+</html>
