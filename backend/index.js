@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 // Connect to MongoDB
-const mongoUri = "mongodb+srv://napzhouyu:wC2KQO25s7w5Poax@cluster0.h1ora.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";  
+const mongoUri = "mongodb+srv://michelleyuche:<db_password>@intouchminds.pqxwm.mongodb.net/?retryWrites=true&w=majority&appName=InTouchMinds";  
 // Database and collections
 let db;
 let lettersCollection;
